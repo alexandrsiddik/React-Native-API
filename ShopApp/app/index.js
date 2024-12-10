@@ -1,8 +1,20 @@
 import { useEffect, useState } from 'react';
-import { FlatList, View } from "react-native";
+import { FlatList, View, RefreshControl } from "react-native";
 import ProductCard from "../components/ProductCard";
 
-const products = [products, setProducts] = useState([])
+export default function HomeScreen() {
+const [products, setProducts] = useState([])
+const [refreshing, setRefreshing] = useState(false)
+
+const fetchProducts = () => {
+    setRefreshing(true)
+    fetch('https://fakestoreapi.com/products')
+    .then(response => response.json())
+    .then(data => {
+        setProducts(data)
+        setRefreshing(false)
+    })
+}
 
 useEffect(() => {
     fetch('https://fakestoreapi.com/products')
@@ -10,13 +22,15 @@ useEffect(() => {
     .then(data => setProducts(data))
 }, [])
 
-export default function HomeScreen() {
     return (
         <View>
             <FlatList
             data={products}
             renderItem={({ item }) => <ProductCard product={item} />}
             keyExtractor={(item) => item.id.toString()}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={fetchProducts} />
+            }
             />
         </View>
     )
